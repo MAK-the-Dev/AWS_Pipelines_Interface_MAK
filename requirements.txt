@@ -1,0 +1,6 @@
+pip install awscli
+pip install flask
+pip install boto3
+pip install flask-mysqldb
+pip install Flask-SocketIO
+pip install eventlet

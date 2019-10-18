@@ -1,0 +1,230 @@
+{% extends 'layout.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<h2>Home Page</h2>
+<p>Welcome back, {{ username }}!</p>
+<style>
+tr:nth-child(odd)	{ background-color:#eee; }
+tr:nth-child(even)	{ background-color:#fff; }
+tr:hover            { background-color:#ffff99; }
+</style>
+<script>
+function sendTimeToServer(name){
+    var time = new Date();
+    var a = document.createElement("img");
+    a.src = "/getTime?time=" + time;
+    console.log(name)
+
+    var table = document.getElementById("tbl");
+        for (var i = 0 ; i < table.rows.length; i++)
+        {
+            console.log(table.rows[i].cells[1].innerHTML)
+            if (table.rows[i].cells[1].innerHTML==name)
+            {
+                console.log("inside IF "+ table.rows[i].cells[1].innerHTML);
+                table.rows[i].cells[4].innerHTML=time;
+            }
+        }
+
+<!--    document.getElementById("time").innerHTML = time;-->
+}
+</script>
+
+<div class="container text-center">
+       <div>
+           <a href='/aws-interface/show_pipeline/T'>
+               <button class="btn btn-info"  style="color:#ffffff;" onclick="sayHello('Test')">Test Pipelines</button>
+           </a>
+            <a href='/aws-interface/show_pipeline/P'>
+                <button class="btn btn-info" style="color:#ffffff;" onclick="sayHello('Production')">Prod Pipelines</button>
+            </a>
+       </div>
+    <table style="width:100%" id="tbl" border="1">
+        <tr style="text-decoration: underline;">
+            <th>Pipeline No.</th>
+            <th>Project Name</th>
+            <th>Run</th>
+            <th>Status</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+        </tr>
+        <div class="container text-center">
+        <h1 style="color:#2f3947">Pipelines</h1>
+        </div>
+        {% for name in pipeline_names %}
+        <!--    <h2>{{titles[loop.index]}}</h2>-->
+        <tr>
+            <td>Pipeline{{loop.index}}</td>
+            <td>{{ name }}</td>
+            <td>
+                <div>
+                    {% if environment_name is not defined %}
+                    <a href='/start_pipeline/{{name}}'>
+                        <button class="btn btn-info" id={{name}} value={{name}} style="color:#ffffff;" onclick="sayHello(this.id); sendTimeToServer('{{name}}');">Start</button>
+                    </a>
+                    {% elif environment_name == 'T' %}
+                     <a href='/start_pipeline/{{name}}/T'>
+                        <button class="btn btn-info" id={{name}} value={{name}} style="color:#ffffff;" onclick="sayHello(this.id); sendTimeToServer('{{name}}');">Start</button>
+                    </a>
+                     {% elif environment_name == 'P' %}
+                     <a href='/start_pipeline/{{name}}/P'>
+                        <button class="btn btn-info" id={{name}} value={{name}} style="color:#ffffff;" onclick="sayHello(this.id); sendTimeToServer('{{name}}');">Start</button>
+                    </a>
+                    {% endif %}
+                </div>
+            </td>
+            <!-- <td id="log"></td>-->
+            <td> </td>
+            {% if now_pipeline == name or now_pipeline == none %}
+            <td id="time">{{ now_time }}</td>
+            {% elif now_pipeline != name and now_pipeline is not none %}
+            <td> </td>
+            {% endif %}
+            <td> </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<!--    {% for msg in msgs %}-->
+<!--<div class="container text-center">-->
+<!--    {% for x in msg %}-->
+<!--    <div>{{ x }}</div>-->
+<!--    {% endfor %}-->
+<!--</div>-->
+<!--    {% endfor %}-->
+
+<div class="container text-central">
+    <div class="container text-center">
+        <h1 style="color:#2f3947">Pipeline History Summary</h1>
+    </div>
+    {% for countMsg in countMsgs %}
+    <div class="row">
+        <div class="col">
+            <table style="width:100%">
+                <tr style="text-decoration: underline;">
+                <td>Pipeline History Summary for Pipeline{{loop.index}} </td>
+                </tr>
+                <tr>
+                <td>Total Pipeline{{loop.index}} Failed in last 10 executions: </td>
+                </tr>
+                <tr>
+                <td>Total Pipeline{{loop.index}} Succeeded in last 10 executions:  </td>
+                </tr>
+                 <tr>
+                <td>Total Pipeline{{loop.index}} Superseded in last 10 executions:  </td>
+                </tr>
+                <tr>
+                <td> &nbsp;</td>
+                </tr>
+            </table>
+        </div>
+        <div class="col">
+            <table style="width:100%">
+                {% for m in countMsg %}
+                <tr>
+                    <td>{{ m|safe }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+
+{% for msg in msgs %}
+<div class="container text-central">
+    <style>
+    .collapsible{{loop.index}}{
+      background-color: #777;
+      color: white;
+      cursor: pointer;
+      padding: 18px;
+      width: 100%;
+      border: none;
+      text-align: left;
+      outline: none;
+      font-size: 15px;
+    }
+
+    .active{{loop.index}}, .collapsible{{loop.index}}:hover {
+      background-color: #555;
+    }
+
+    .content{{loop.index}} {
+      padding: 0 18px;
+      display: none;
+      overflow: hidden;
+      background-color: #f1f1f1;
+    }
+    </style>
+
+    <button type="button" class="collapsible{{loop.index}}">See Detail History Of Pipeline{{loop.index}}</button>
+    <div class="content{{loop.index}}">
+        <div class="row">
+            <div class="col">
+                <table style="width:100%">
+                    {% for a in msg %}
+                    <tr style="text-decoration: underline;">
+                    <td>Pipeline History for Last Execution No. {{loop.index}} </td>
+                    </tr>
+                    <tr>
+                    <td>Pipeline Name: </td>
+                    </tr>
+                    <tr>
+                    <td>Pipeline Pipeline Execution Id:  </td>
+                    </tr>
+                    <tr>
+                    <td>Pipeline Status:  </td>
+                    </tr>
+                    <tr>
+                    <td>Pipeline Start Time:  </td>
+                    </tr>
+                    <tr>
+                    <td>Pipeline Last Update Time:  </td>
+                    </tr>
+                    <tr>
+                    <td> &nbsp;</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+             </div>
+            <div class="col">
+                <table style="width:100%">
+                    {% for a in msg %}
+                    {% for x in a %}
+                    <tr>
+                        <td>{{ x|safe }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+var coll = document.getElementsByClassName("collapsible{{loop.index}}");
+var i;
+
+for (i = 0; i < coll.length; i++)
+{
+    coll[i].addEventListener("click", function() {
+        this.classList.toggle("active{{loop.index}}");
+        var content = this.nextElementSibling;
+        if (content.style.display === "block")
+        {
+          content.style.display = "none";
+        }
+        else
+        {
+          content.style.display = "block";
+        }
+    });
+}
+</script>
+{% endfor %}
+{% endblock %}
